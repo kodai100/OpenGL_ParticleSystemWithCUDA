@@ -85,17 +85,14 @@ void simulationRoutine(GLFWwindow* window) {
 	Camera cam = Camera();
 	cam.eye = glm::vec3(10, 0, 0);	// カメラ位置
 
-									// パーティクルとセルのメモリを確保、パーティクル情報をデバイスにコピー
-	ParticleSystem system = ParticleSystem(particles, sp);
+	ParticleSystem system = ParticleSystem(particles, sp);	// パーティクルのメモリを確保、パーティクル情報をデバイスにコピー
 
 	Renderer renderer = Renderer(width, height, &sp);
 	renderer.setProjection(glm::infinitePerspective(cam.zoom, float(width) / float(height), 0.1f));
-	//Initialize buffers for drawing snow
-	// CUDAデバイスにVBOデータをリンク？
+	// パーティクル描画のためのバッファを用意 + CUDAデバイスにVBOデータをリンク？
 	renderer.initSnowBuffers(sp.numParticles);
 
-	//Take 1 step for initialization
-	system.updateWrapper(sp);
+	system.updateWrapper(sp); //Take 1 step for initialization
 
 	while (!glfwWindowShouldClose(window)) {
 		//Set frame times
@@ -116,7 +113,6 @@ void simulationRoutine(GLFWwindow* window) {
 		if (!paused) {
 			if (frameCounter % (int)(1 / (sp.deltaT * 30 * 3)) == 0) {
 				cout << lastFrame << endl;
-
 			}
 		}
 
