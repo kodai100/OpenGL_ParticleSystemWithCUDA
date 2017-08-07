@@ -9,15 +9,18 @@
 
 using namespace std;
 
+// ホスト側の変数
 static dim3 particleDims;
 static const int blockSize = 128;
 
+// コンスタントメモリ。全スレッドからアクセス可能だがデバイスから変更はできない。
 __constant__ solverParams sp;
 
 __global__ void updatePositions(Particle* particles) {
 	int index = threadIdx.x + (blockIdx.x * blockDim.x);
 	if (index >= sp.numParticles) return;
 
+	// particles[index].velocity += sp.deltaT * sp.gravity;
 	particles[index].pos += sp.deltaT * particles[index].velocity;
 }
 
@@ -37,6 +40,8 @@ void update(Particle* particles) {
 
 __host__ void setParams(solverParams *params) {
 	particleDims = int(ceil(params->numParticles / blockSize + 0.5f));
+
+	// デバイス側のグローバル変数(コンスタントメモリ)にコピー
 	cudaCheck(cudaMemcpyToSymbol(sp, params, sizeof(solverParams)));	// このエラーは無視してOK
 }
 
