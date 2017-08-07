@@ -87,7 +87,7 @@ void simulationRoutine(GLFWwindow* window) {
 	cam.eye = glm::vec3(10, 0, 0);	// カメラ位置
 
 	Renderer renderer = Renderer(width, height, &sp);
-	renderer.setProjection(glm::infinitePerspective(cam.zoom, float(width) / float(height), 0.1f));
+	renderer.setProjection(glm::infinitePerspective(cam.zoom, float(width) / float(height), 0.1f));	// プロジェクション変換行列の作成
 	// パーティクル描画のためのバッファを用意 + CUDAデバイスにVBOデータをリンク？
 	renderer.initSnowBuffers(sp.numParticles);
 
