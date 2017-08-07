@@ -3,7 +3,7 @@
 
 using namespace std;
 
-ParticleSystem::ParticleSystem(vector<Particle>& particles, solverParams& params) {
+ParticleSystem::ParticleSystem(vector<Particle>& p, solverParams& params) {
 
 	solverParams sp = params;
 
@@ -14,10 +14,14 @@ ParticleSystem::ParticleSystem(vector<Particle>& particles, solverParams& params
 	cout << "radius: " << sp.radius << endl;
 
 	// デバイスメモリの確保
+	// char *d_hello;
+	// char hello[32];
+	// cudaMalloc((void**)&d_hello, 32);
+	// this : thisポインタ
 	cudaCheck(cudaMalloc((void**)&this->particles, params.numParticles * sizeof(Particle)));
 
 	// デバイスメモリへコピー
-	cudaCheck(cudaMemcpy(this->particles, &particles[0], params.numParticles * sizeof(Particle), cudaMemcpyHostToDevice));
+	cudaCheck(cudaMemcpy(this->particles, &p[0], params.numParticles * sizeof(Particle), cudaMemcpyHostToDevice));
 }
 
 ParticleSystem::~ParticleSystem() {
