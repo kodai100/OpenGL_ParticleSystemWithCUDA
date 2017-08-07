@@ -21,7 +21,7 @@ public:
 	~Renderer();
 
 	void setProjection(glm::mat4 projection);
-	void initSnowBuffers(int numParticles);
+	void initParticleBuffers(int numParticles);
 	void render(Camera& cam);
 
 private:
@@ -29,8 +29,8 @@ private:
 	glm::mat4 mView, projection;
 	int width, height;
 	float aspectRatio;
-	Shader snow;
-	snowBuffers snowBuffers;
+	Shader particleShader;
+	snowBuffers particleBuffers;
 
 	void renderSnow(Camera& cam);
 };

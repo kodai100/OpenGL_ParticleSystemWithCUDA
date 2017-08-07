@@ -89,7 +89,7 @@ void simulationRoutine(GLFWwindow* window) {
 	Renderer renderer = Renderer(width, height, &sp);
 	renderer.setProjection(glm::infinitePerspective(cam.zoom, float(width) / float(height), 0.1f));	// プロジェクション変換行列の作成
 	// パーティクル描画のためのバッファを用意 + CUDAデバイスにVBOデータをリンク？
-	renderer.initSnowBuffers(sp.numParticles);
+	renderer.initParticleBuffers(sp.numParticles);
 
 	system.updateWrapper(sp); //Take 1 step for initialization
 
