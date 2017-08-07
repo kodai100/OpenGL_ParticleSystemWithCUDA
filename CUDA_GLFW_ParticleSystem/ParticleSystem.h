@@ -11,7 +11,7 @@ public:
 	~ParticleSystem();
 
 	void updateWrapper(solverParams& params);
-	void getPositionsWrapper(float* positionsPtr);
+	void getPositionsWrapper(float3* positionsPtr);
 
 private:
 	Particle* particles;	// デバイスメモリのポインタ

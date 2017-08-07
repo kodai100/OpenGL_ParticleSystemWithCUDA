@@ -24,13 +24,11 @@ __global__ void updatePositions(Particle* particles) {
 	particles[index].pos += sp.deltaT * particles[index].velocity;
 }
 
-__global__ void getPos(float* positionsPtr, Particle* particles) {
+__global__ void getPos(float3* positionsPtr, Particle* particles) {
 	int index = threadIdx.x + (blockIdx.x * blockDim.x);
 	if (index >= sp.numParticles) return;
 
-	positionsPtr[3 * index + 0] = particles[index].pos.x;
-	positionsPtr[3 * index + 1] = particles[index].pos.y;
-	positionsPtr[3 * index + 2] = particles[index].pos.z;
+	positionsPtr[index] = particles[index].pos;
 }
 
 
@@ -45,7 +43,7 @@ __host__ void setParams(solverParams *params) {
 	cudaCheck(cudaMemcpyToSymbol(sp, params, sizeof(solverParams)));	// Ç±ÇÃÉGÉâÅ[ÇÕñ≥éãÇµÇƒOK
 }
 
-__host__ void getPositions(float* positionsPtr, Particle* particles) {
+__host__ void getPositions(float3* positionsPtr, Particle* particles) {
 	getPos<<<particleDims, blockSize>>>(positionsPtr, particles);
 }
 

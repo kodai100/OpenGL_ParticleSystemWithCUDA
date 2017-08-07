@@ -188,7 +188,7 @@ void mainUpdate(ParticleSystem& system, Renderer& renderer, Camera& cam, solverP
 	size_t size;
 	cudaGraphicsResourceGetMappedPointer(&positionsPtr, &size, renderer.resource);	// GLで確保されているVBOをカーネル関数から操作できるポインタの形で取得
 
-	system.getPositionsWrapper((float*)positionsPtr);	// float*にキャストし、cudaの計算結果を取得(numParticles * 3 (x,y,z))
+	system.getPositionsWrapper((float3*)positionsPtr);	// float*にキャストし、cudaの計算結果を取得(numParticles * 3 (x,y,z))
 
 	cudaGraphicsUnmapResources(1, &renderer.resource, 0);	// 操作後はcudaGraphicsUnmapResources()でマッピングを解除。
 

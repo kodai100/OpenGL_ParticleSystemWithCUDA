@@ -33,7 +33,7 @@ void ParticleSystem::updateWrapper(solverParams& params) {
 	update(particles);	// CUDA側の関数	CUDA側で確保したパーティクルポインタ
 }
 
-void ParticleSystem::getPositionsWrapper(float* positionsPtr) {
+void ParticleSystem::getPositionsWrapper(float3* positionsPtr) {
 	// cudaのメモリから取得してマッピングする
 	getPositions(positionsPtr, particles);	// CUDA側の関数
 }

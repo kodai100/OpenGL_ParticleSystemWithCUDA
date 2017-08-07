@@ -31,7 +31,7 @@ void Renderer::initParticleBuffers(int numParticles) {
 	// 頂点バッファオブジェクトを一つ作成
 	glGenBuffers(1, &particleBuffers.positions);	// GLuint
 	glBindBuffer(GL_ARRAY_BUFFER, particleBuffers.positions);	// 作成したバッファをGL_ARRAY_BUFFERに結合
-	glBufferData(GL_ARRAY_BUFFER, numParticles * 3 * sizeof(float), 0, GL_DYNAMIC_DRAW);	// 現在結合されている頂点バッファオブジェクトのデータのメモリをsizeだけ確保し、データ(今回は0)を転送
+	glBufferData(GL_ARRAY_BUFFER, numParticles * sizeof(float3), 0, GL_DYNAMIC_DRAW);	// 現在結合されている頂点バッファオブジェクトのデータのメモリをsizeだけ確保し、データ(今回は0)を転送
 	glBindBuffer(GL_ARRAY_BUFFER, 0);	// 結合を解除？
 
 	// glGenBuffers()で生成したVBOのIDを登録。CUDAからGLのvboをいじることができるようになった
