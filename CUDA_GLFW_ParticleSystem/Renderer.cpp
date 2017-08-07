@@ -7,7 +7,7 @@ static const float radius = 0.008f;
 Renderer::Renderer(int width, int height, solverParams* sp) :
 width(width),
 height(height),
-particleShader(Shader("snow.vert", "snow.frag"))
+particleShader(Shader("particle.vert", "particle.frag"))
 {
 	this->sp = sp;
 	aspectRatio = float(width) / float(height);
