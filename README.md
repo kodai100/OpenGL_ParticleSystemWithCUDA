@@ -14,13 +14,8 @@ Additional Dependencies
 
 Screenshots
 --------------------------------------------------------
-### Screenshot1
+### Blue Particles
 ![screenshot](https://github.com/kodai100/ParticleSystemWithCUDA/blob/master/thumbnails/1.jpg)
-### Screenshot2
-![screenshot](image-link)
-### Screenshot3
-![screenshot](image-link)
-
 
 Compatibility
 --------------------------------------------------------
