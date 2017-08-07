@@ -4,6 +4,8 @@ Particle System with CUDA + GLFW
 
 This is a simple implementation of Particle System with CUDA and GLFW integration.
 
+Inspired by [JAGJ10's Snow simulation repository](https://github.com/JAGJ10/Snow).
+
 Additional Dependencies
 --------------------------------------------------------
 
