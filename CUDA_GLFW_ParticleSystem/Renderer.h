@@ -7,7 +7,7 @@
 #include <cuda_gl_interop.h>
 #include "Parameters.h"
 
-struct snowBuffers {
+struct ParticleBufferData {
 	GLuint vao;
 	GLuint positions;
 	int numParticles;
@@ -30,7 +30,7 @@ private:
 	int width, height;
 	float aspectRatio;
 	Shader particleShader;
-	snowBuffers particleBuffers;
+	ParticleBufferData particleBuffers;
 
 	void renderSnow(Camera& cam);
 };
