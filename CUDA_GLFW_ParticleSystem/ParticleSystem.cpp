@@ -30,7 +30,7 @@ ParticleSystem::~ParticleSystem() {
 void ParticleSystem::updateWrapper(solverParams& params) {
 	// cuファイルのグローバルスタティック変数に値をセット
 	setParams(&params);	// CUDA側の関数
-	update(particles);	// CUDA側の関数
+	update(particles);	// CUDA側の関数	CUDA側で確保したパーティクルポインタ
 }
 
 void ParticleSystem::getPositionsWrapper(float* positionsPtr) {

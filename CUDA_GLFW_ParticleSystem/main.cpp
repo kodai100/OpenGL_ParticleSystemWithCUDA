@@ -91,7 +91,7 @@ void simulationRoutine(GLFWwindow* window) {
 	// パーティクル描画のためのバッファを用意 + CUDAデバイスにVBOデータをリンク？
 	renderer.initParticleBuffers(sp.numParticles);
 
-	system.updateWrapper(sp); //Take 1 step for initialization
+	system.updateWrapper(sp); // 初期画面表示用に一回計算し、バッファに結果を保持しておく
 
 	while (!glfwWindowShouldClose(window)) {
 		//Set frame times
@@ -180,18 +180,17 @@ void mainUpdate(ParticleSystem& system, Renderer& renderer, Camera& cam, solverP
 		frameCounter++;
 	}
 
-	// Update the VBO
-	// GLとCUDAの連携
+	// VBOの更新(CUDAで計算した結果をGLのVBOに反映する)
 	// cudaGraphicsMapResources()、cudaGraphicsResourceGetMappedPointer()でカーネル関数から操作できるポインタを得る。
-	// 操作後はcudaGraphicsUnmapResources()でマッピングを解除。
-	void* positionsPtr;	//型は分からない状態
+	
+	void* positionsPtr;	// voidポインター型で取得しないといけない
 	cudaCheck(cudaGraphicsMapResources(1, &renderer.resource));
 	size_t size;
-	cudaGraphicsResourceGetMappedPointer(&positionsPtr, &size, renderer.resource);	// OpenGLで生成したバッファのポインタを取得
+	cudaGraphicsResourceGetMappedPointer(&positionsPtr, &size, renderer.resource);	// GLで確保されているVBOをカーネル関数から操作できるポインタの形で取得
 
-	// 
-	system.getPositionsWrapper((float*)positionsPtr);	// float[]にキャストし、cudaの計算結果を取得(numParticles * 3 (x,y,z))
-	cudaGraphicsUnmapResources(1, &renderer.resource, 0);
+	system.getPositionsWrapper((float*)positionsPtr);	// float*にキャストし、cudaの計算結果を取得(numParticles * 3 (x,y,z))
+
+	cudaGraphicsUnmapResources(1, &renderer.resource, 0);	// 操作後はcudaGraphicsUnmapResources()でマッピングを解除。
 
 	//Render
 	renderer.render(cam);
