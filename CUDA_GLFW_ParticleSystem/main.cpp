@@ -79,23 +79,19 @@ void simulationRoutine(GLFWwindow* window) {
 
 	CurlNoise scene("CurlNoise");
 	solverParams sp;
-
-	scene.init(particles, &sp);	// ソルバーのパラメータを決める
+	scene.init(particles, &sp);	// ソルバーのパラメータを決める & パーティクルデータの生成
+	
+	ParticleSystem system = ParticleSystem(particles, sp);	// パーティクルのメモリを確保、パーティクル情報をデバイスにコピー
 
 	Camera cam = Camera();
 	cam.eye = glm::vec3(10, 0, 0);	// カメラ位置
 
-									// パーティクルとセルのメモリを確保、パーティクル情報をデバイスにコピー
-	ParticleSystem system = ParticleSystem(particles, sp);
-
 	Renderer renderer = Renderer(width, height, &sp);
-	renderer.setProjection(glm::infinitePerspective(cam.zoom, float(width) / float(height), 0.1f));
-	//Initialize buffers for drawing snow
-	// CUDAデバイスにVBOデータをリンク？
-	renderer.initSnowBuffers(sp.numParticles);
+	renderer.setProjection(glm::infinitePerspective(cam.zoom, float(width) / float(height), 0.1f));	// プロジェクション変換行列の作成
+	// パーティクル描画のためのバッファを用意 + CUDAデバイスにVBOデータをリンク？
+	renderer.initParticleBuffers(sp.numParticles);
 
-	//Take 1 step for initialization
-	system.updateWrapper(sp);
+	system.updateWrapper(sp); // 初期画面表示用に一回計算し、バッファに結果を保持しておく
 
 	while (!glfwWindowShouldClose(window)) {
 		//Set frame times
@@ -116,7 +112,6 @@ void simulationRoutine(GLFWwindow* window) {
 		if (!paused) {
 			if (frameCounter % (int)(1 / (sp.deltaT * 30 * 3)) == 0) {
 				cout << lastFrame << endl;
-
 			}
 		}
 
@@ -185,18 +180,17 @@ void mainUpdate(ParticleSystem& system, Renderer& renderer, Camera& cam, solverP
 		frameCounter++;
 	}
 
-	// Update the VBO
-	// GLとCUDAの連携
+	// VBOの更新(CUDAで計算した結果をGLのVBOに反映する)
 	// cudaGraphicsMapResources()、cudaGraphicsResourceGetMappedPointer()でカーネル関数から操作できるポインタを得る。
-	// 操作後はcudaGraphicsUnmapResources()でマッピングを解除。
-	void* positionsPtr;	//型は分からない状態
+	
+	void* positionsPtr;	// voidポインター型で取得しないといけない
 	cudaCheck(cudaGraphicsMapResources(1, &renderer.resource));
 	size_t size;
-	cudaGraphicsResourceGetMappedPointer(&positionsPtr, &size, renderer.resource);	// OpenGLで生成したバッファのポインタを取得
+	cudaGraphicsResourceGetMappedPointer(&positionsPtr, &size, renderer.resource);	// GLで確保されているVBOをカーネル関数から操作できるポインタの形で取得
 
-	// 
-	system.getPositionsWrapper((float*)positionsPtr);	// float[]にキャストし、cudaの計算結果を取得(numParticles * 3 (x,y,z))
-	cudaGraphicsUnmapResources(1, &renderer.resource, 0);
+	system.getPositionsWrapper((float3*)positionsPtr);	// float*にキャストし、cudaの計算結果を取得(numParticles * 3 (x,y,z))
+
+	cudaGraphicsUnmapResources(1, &renderer.resource, 0);	// 操作後はcudaGraphicsUnmapResources()でマッピングを解除。
 
 	//Render
 	renderer.render(cam);

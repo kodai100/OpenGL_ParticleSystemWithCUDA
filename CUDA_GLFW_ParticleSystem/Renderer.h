@@ -7,7 +7,7 @@
 #include <cuda_gl_interop.h>
 #include "Parameters.h"
 
-struct snowBuffers {
+struct ParticleBufferData {
 	GLuint vao;
 	GLuint positions;
 	int numParticles;
@@ -21,7 +21,7 @@ public:
 	~Renderer();
 
 	void setProjection(glm::mat4 projection);
-	void initSnowBuffers(int numParticles);
+	void initParticleBuffers(int numParticles);
 	void render(Camera& cam);
 
 private:
@@ -29,8 +29,8 @@ private:
 	glm::mat4 mView, projection;
 	int width, height;
 	float aspectRatio;
-	Shader snow;
-	snowBuffers snowBuffers;
+	Shader particleShader;
+	ParticleBufferData particleBuffers;
 
 	void renderSnow(Camera& cam);
 };

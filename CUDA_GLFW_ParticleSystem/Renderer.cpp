@@ -7,16 +7,16 @@ static const float radius = 0.008f;
 Renderer::Renderer(int width, int height, solverParams* sp) :
 width(width),
 height(height),
-snow(Shader("snow.vert", "snow.frag"))
+particleShader(Shader("snow.vert", "snow.frag"))
 {
 	this->sp = sp;
 	aspectRatio = float(width) / float(height);
 }
 
 Renderer::~Renderer() {
-	if (snowBuffers.vao != 0) {
-		glDeleteVertexArrays(1, &snowBuffers.vao);
-		glDeleteBuffers(1, &snowBuffers.positions);
+	if (particleBuffers.vao != 0) {
+		glDeleteVertexArrays(1, &particleBuffers.vao);
+		glDeleteBuffers(1, &particleBuffers.positions);
 	}
 }
 
@@ -24,19 +24,22 @@ void Renderer::setProjection(glm::mat4 projection) {
 	this->projection = projection;
 }
 
-void Renderer::initSnowBuffers(int numParticles) {
-	glGenVertexArrays(1, &snowBuffers.vao);
+void Renderer::initParticleBuffers(int numParticles) {
+	// Vertex Array Objectを一つ作成
+	glGenVertexArrays(1, &particleBuffers.vao); // GLuint
 
-	glGenBuffers(1, &snowBuffers.positions);
-	glBindBuffer(GL_ARRAY_BUFFER, snowBuffers.positions);
-	glBufferData(GL_ARRAY_BUFFER, numParticles * 3 * sizeof(float), 0, GL_DYNAMIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	// 頂点バッファオブジェクトを一つ作成
+	glGenBuffers(1, &particleBuffers.positions);	// GLuint
+	glBindBuffer(GL_ARRAY_BUFFER, particleBuffers.positions);	// 作成したバッファをGL_ARRAY_BUFFERに結合
+	glBufferData(GL_ARRAY_BUFFER, numParticles * sizeof(float3), 0, GL_DYNAMIC_DRAW);	// 現在結合されている頂点バッファオブジェクトのデータのメモリをsizeだけ確保し、データ(今回は0)を転送
+	glBindBuffer(GL_ARRAY_BUFFER, 0);	// 結合を解除？
 
-	// glGenBuffers()で生成したVBOのIDを登録。
+	// glGenBuffers()で生成したVBOのIDを登録。CUDAからGLのvboをいじることができるようになった
 	// http://shouyu.hatenablog.com/entry/2011/12/05/192410
-	cudaGraphicsGLRegisterBuffer(&resource, snowBuffers.positions, cudaGraphicsRegisterFlagsWriteDiscard);
+	// cudaGraphicsGLRegisterBuffer(&cudaResouerce, vbo, cudaGraphicsMapFlagsWriteDiscard(Write Only));
+	cudaGraphicsGLRegisterBuffer(&resource, particleBuffers.positions, cudaGraphicsRegisterFlagsWriteDiscard);
 
-	snowBuffers.numParticles = numParticles;
+	particleBuffers.numParticles = numParticles;
 }
 
 void Renderer::render(Camera& cam) {
@@ -52,21 +55,21 @@ void Renderer::render(Camera& cam) {
 }
 
 void Renderer::renderSnow(Camera& cam) {
-	glUseProgram(snow.program);
+	glUseProgram(particleShader.program);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	snow.setUniformmat4("mView", mView);
-	snow.setUniformmat4("projection", projection);
-	snow.setUniformf("pointRadius", radius);
-	snow.setUniformf("pointScale", width / aspectRatio * (1.0f / tanf(cam.zoom * 0.5f)));
+	particleShader.setUniformmat4("mView", mView);
+	particleShader.setUniformmat4("projection", projection);
+	particleShader.setUniformf("pointRadius", radius);
+	particleShader.setUniformf("pointScale", width / aspectRatio * (1.0f / tanf(cam.zoom * 0.5f)));
 
 	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 	glEnable(GL_CULL_FACE);
 
 	//Draw snow
-	glBindVertexArray(snowBuffers.vao);
-	glBindBuffer(GL_ARRAY_BUFFER, snowBuffers.positions);
+	glBindVertexArray(particleBuffers.vao);
+	glBindBuffer(GL_ARRAY_BUFFER, particleBuffers.positions);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);
-	glDrawArrays(GL_POINTS, 0, GLsizei(snowBuffers.numParticles));
+	glDrawArrays(GL_POINTS, 0, GLsizei(particleBuffers.numParticles));
 }
