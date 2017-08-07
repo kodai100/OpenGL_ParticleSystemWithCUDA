@@ -79,13 +79,12 @@ void simulationRoutine(GLFWwindow* window) {
 
 	CurlNoise scene("CurlNoise");
 	solverParams sp;
-
-	scene.init(particles, &sp);	// ソルバーのパラメータを決める
+	scene.init(particles, &sp);	// ソルバーのパラメータを決める & パーティクルデータの生成
+	
+	ParticleSystem system = ParticleSystem(particles, sp);	// パーティクルのメモリを確保、パーティクル情報をデバイスにコピー
 
 	Camera cam = Camera();
 	cam.eye = glm::vec3(10, 0, 0);	// カメラ位置
-
-	ParticleSystem system = ParticleSystem(particles, sp);	// パーティクルのメモリを確保、パーティクル情報をデバイスにコピー
 
 	Renderer renderer = Renderer(width, height, &sp);
 	renderer.setProjection(glm::infinitePerspective(cam.zoom, float(width) / float(height), 0.1f));
