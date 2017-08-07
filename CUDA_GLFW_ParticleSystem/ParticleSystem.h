@@ -14,7 +14,7 @@ public:
 	void getPositionsWrapper(float* positionsPtr);
 
 private:
-	Particle* particles;
+	Particle* particles;	// デバイスメモリのポインタ
 
 	#define cudaCheck(x) { cudaError_t err = x; if (err != cudaSuccess) { printf("Cuda error: %d in %s at %s:%d\n", err, #x, __FILE__, __LINE__); assert(0); } }
 };
