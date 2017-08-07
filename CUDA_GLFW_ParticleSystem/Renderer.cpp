@@ -25,15 +25,18 @@ void Renderer::setProjection(glm::mat4 projection) {
 }
 
 void Renderer::initParticleBuffers(int numParticles) {
-	glGenVertexArrays(1, &particleBuffers.vao);
+	// Vertex Array Objectを一つ作成
+	glGenVertexArrays(1, &particleBuffers.vao); // GLuint
 
-	glGenBuffers(1, &particleBuffers.positions);
-	glBindBuffer(GL_ARRAY_BUFFER, particleBuffers.positions);
-	glBufferData(GL_ARRAY_BUFFER, numParticles * 3 * sizeof(float), 0, GL_DYNAMIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	// 頂点バッファオブジェクトを一つ作成
+	glGenBuffers(1, &particleBuffers.positions);	// GLuint
+	glBindBuffer(GL_ARRAY_BUFFER, particleBuffers.positions);	// 作成したバッファをGL_ARRAY_BUFFERに結合
+	glBufferData(GL_ARRAY_BUFFER, numParticles * 3 * sizeof(float), 0, GL_DYNAMIC_DRAW);	// 現在結合されている頂点バッファオブジェクトのデータのメモリをsizeだけ確保し、データ(今回は0)を転送
+	glBindBuffer(GL_ARRAY_BUFFER, 0);	// 結合を解除？
 
-	// glGenBuffers()で生成したVBOのIDを登録。
+	// glGenBuffers()で生成したVBOのIDを登録。CUDAからGLのvboをいじることができるようになった
 	// http://shouyu.hatenablog.com/entry/2011/12/05/192410
+	// cudaGraphicsGLRegisterBuffer(&cudaResouerce, vbo, cudaGraphicsMapFlagsWriteDiscard(Write Only));
 	cudaGraphicsGLRegisterBuffer(&resource, particleBuffers.positions, cudaGraphicsRegisterFlagsWriteDiscard);
 
 	particleBuffers.numParticles = numParticles;
