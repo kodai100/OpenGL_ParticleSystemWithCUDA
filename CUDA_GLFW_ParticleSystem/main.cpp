@@ -25,6 +25,8 @@ static int w = 0;
 static bool paused = true;
 static bool spacePressed = false;
 
+GLFWwindow* makeGLFWwindow();
+void simulationRoutine(GLFWwindow* window);
 void handleInput(GLFWwindow* window, ParticleSystem &system, Camera &cam);
 void mainUpdate(ParticleSystem& system, Renderer& renderer, Camera& cam, solverParams& params);
 
@@ -36,13 +38,20 @@ int main() {
 	// デバイスの指定。どのCUDAコマンドよりも先に呼ぶ必要あり
 	// http://shouyu.hatenablog.com/entry/2011/12/05/192410
 	cudaGLSetGLDevice(0);
+	
+	GLFWwindow* window = makeGLFWwindow();
 
-	// ----------------------------------
-	// GLFW, GLEW
-	// ----------------------------------
+	simulationRoutine(window);
+
+	glfwTerminate();
+
+	return 0;
+}
+
+GLFWwindow* makeGLFWwindow() {
+	if (!glfwInit()) exit(EXIT_FAILURE);
 
 	// This function sets hints for the next call to glfwCreateWindow. 
-	if (!glfwInit()) exit(EXIT_FAILURE);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -61,21 +70,22 @@ int main() {
 	glGetError();
 	glViewport(0, 0, width, height);	//Define the viewport dimensions
 
-	// ----------------------------------
-	// Snow Simulation
-	// ----------------------------------
+	return window;
+}
+
+void simulationRoutine(GLFWwindow* window) {
 
 	vector<Particle> particles;	// パーティクルデータの初期化
-	
+
 	CurlNoise scene("CurlNoise");
 	solverParams sp;
-	
+
 	scene.init(particles, &sp);	// ソルバーのパラメータを決める
 
 	Camera cam = Camera();
 	cam.eye = glm::vec3(10, 0, 0);	// カメラ位置
 
-	// パーティクルとセルのメモリを確保、パーティクル情報をデバイスにコピー
+									// パーティクルとセルのメモリを確保、パーティクル情報をデバイスにコピー
 	ParticleSystem system = ParticleSystem(particles, sp);
 
 	Renderer renderer = Renderer(width, height, &sp);
@@ -99,24 +109,19 @@ int main() {
 
 		//Step physics and render
 		mainUpdate(system, renderer, cam, sp);
-		
+
 		//Swap back buffers
 		glfwSwapBuffers(window);
 
 		if (!paused) {
 			if (frameCounter % (int)(1 / (sp.deltaT * 30 * 3)) == 0) {
 				cout << lastFrame << endl;
-				
+
 			}
 		}
 
 		//glfwSetCursorPos(window, lastX, lastY);
 	}
-
-
-	glfwTerminate();
-
-	return 0;
 }
 
 void handleInput(GLFWwindow* window, ParticleSystem &system, Camera &cam) {
